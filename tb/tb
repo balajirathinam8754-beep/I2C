@@ -1,0 +1,48 @@
+
+module i2c_master_tb;
+
+reg clk = 0;
+reg rst;
+reg start;
+reg [6:0] addr;
+reg rw;
+reg [7:0] data_in;
+wire scl;
+wire sda;
+
+// Clock generation
+always #5 clk = ~clk;
+
+// DUT
+i2c_master dut (
+    .clk(clk),
+    .rst(rst),
+    .start(start),
+    .addr(addr),
+    .rw(rw),
+    .data_in(data_in),
+    .data_out(),
+    .busy(),
+    .scl(scl),
+    .sda(sda)
+);
+
+initial begin
+    $monitor("Time=%0t START=%b ADDR=%h DATA=%h SCL=%b SDA=%b",
+              $time, start, addr, data_in, scl, sda);
+
+    rst = 1; start = 0;
+    #10 rst = 0;
+
+    // Write transaction
+    addr = 7'h50;
+    data_in = 8'hA5;
+    rw = 0;
+
+    start = 1; #10 start = 0;
+
+    #200;
+    $finish;
+end
+
+endmodule
