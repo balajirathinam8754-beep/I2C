@@ -1,0 +1,60 @@
+module tb_top;
+
+    logic clk;
+
+    i2c_if i2c_vif(clk);
+
+
+    i2c_master dut (
+
+        .clk      (clk),
+        .rst      (i2c_vif.rst),
+        .start    (i2c_vif.start),
+        .addr     (i2c_vif.addr),
+        .rw       (i2c_vif.rw),
+        .data_in  (i2c_vif.data_in),
+        .data_out (i2c_vif.data_out),
+        .busy     (i2c_vif.busy),
+        .scl      (i2c_vif.scl),
+        .sda      (i2c_vif.sda)
+
+    );
+
+
+    initial begin
+
+        clk = 1'b0;
+
+        forever
+            #5 clk = ~clk;
+
+    end
+
+
+    initial begin
+
+        i2c_vif.rst = 1'b1;
+
+        i2c_vif.start = 1'b0;
+
+        #50;
+
+        i2c_vif.rst = 1'b0;
+
+    end
+
+
+    initial begin
+
+        uvm_config_db#(virtual i2c_if)::set(
+            null,
+            "*",
+            "vif",
+            i2c_vif
+        );
+
+        run_test("i2c_test");
+
+    end
+
+endmodule
