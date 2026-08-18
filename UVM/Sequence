@@ -1,0 +1,28 @@
+class i2c_sequence extends uvm_sequence #(i2c_sequence_item);
+
+    `uvm_object_utils(i2c_sequence)
+
+    function new(string name = "i2c_sequence");
+        super.new(name);
+    endfunction
+
+    task body();
+
+        i2c_sequence_item req;
+
+        repeat (10) begin
+
+            req =
+                i2c_sequence_item::type_id::create("req");
+
+            start_item(req);
+
+            assert(req.randomize());
+
+            finish_item(req);
+
+        end
+
+    endtask
+
+endclass
