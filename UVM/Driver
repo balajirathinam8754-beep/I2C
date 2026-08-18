@@ -1,0 +1,66 @@
+class i2c_driver extends uvm_driver #(i2c_sequence_item);
+
+    `uvm_component_utils(i2c_driver)
+
+    virtual i2c_if vif;
+
+    function new(
+        string name = "i2c_driver",
+        uvm_component parent = null
+    );
+
+        super.new(name, parent);
+
+    endfunction
+
+
+    function void build_phase(uvm_phase phase);
+
+        super.build_phase(phase);
+
+        if (!uvm_config_db#(virtual i2c_if)::get(
+                this,
+                "",
+                "vif",
+                vif
+            ))
+
+            `uvm_fatal(
+                "I2C_DRV",
+                "Virtual interface not found"
+            );
+
+    endfunction
+
+
+    task run_phase(uvm_phase phase);
+
+        i2c_sequence_item req;
+
+        forever begin
+
+            seq_item_port.get_next_item(req);
+
+            @(posedge vif.clk);
+
+            vif.addr    <= req.addr;
+            vif.rw      <= req.rw;
+            vif.data_in <= req.data_in;
+
+            vif.start <= 1'b1;
+
+            @(posedge vif.clk);
+
+            vif.start <= 1'b0;
+
+            wait(vif.busy == 1'b1);
+
+            wait(vif.busy == 1'b0);
+
+            seq_item_port.item_done();
+
+        end
+
+    endtask
+
+endclass
